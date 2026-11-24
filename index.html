@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Al-Haitham — Search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #cfd9d6;
+      --ink: #1d2b2a;
+      --muted: #5b6e6b;
+      --teal: #1f7a6e;
+      --teal-dark: #155a51;
+      --olive: #8a7d4a;
+      --brown: #8c5a3c;
+      --grey: #8a8a86;
+      --card: rgba(255, 255, 255, 0.82);
+      --shadow: 0 10px 30px rgba(20, 50, 45, 0.18);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--ink);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,255,255,.6), transparent 40%),
+        linear-gradient(135deg, #dfe7e4 0%, #bcd0cb 55%, #a9c3bd 100%);
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+    button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+    .app {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 20px 24px 32px;
+      display: grid;
+      gap: 18px;
+    }
+
+    /* ---------- HEADER ---------- */
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 16px;
+    }
+    .header-left, .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-right { justify-content: flex-end; }
+
+    .logo {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #2b2b2b, #6a3d9a);
+      display: grid; place-items: center;
+      color: #fff; font-weight: 700; font-size: 18px;
+      box-shadow: var(--shadow);
+    }
+    .icon-btn {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: var(--teal);
+      color: #fff;
+      display: grid; place-items: center;
+      font-size: 26px; line-height: 1;
+      transition: transform .2s ease, background .2s ease;
+    }
+    .icon-btn:hover { background: var(--teal-dark); transform: scale(1.06); }
+
+    .nav {
+      display: flex;
+      gap: 44px;
+      font-size: 18px;
+      font-weight: 500;
+    }
+    .nav a {
+      position: relative;
+      padding: 6px 2px;
+      color: var(--ink);
+      transition: color .2s ease;
+    }
+    .nav a::after {
+      content: "";
+      position: absolute; left: 0; right: 0; bottom: 0;
+      height: 2px; background: var(--ink);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .25s ease;
+    }
+    .nav a:hover::after,
+    .nav a.active::after { transform: scaleX(1); }
+    .nav a.active { font-weight: 600; }
+
+    .user-pill {
+      padding: 10px 22px;
+      border-radius: 999px;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 500;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .user-pill:hover { background: var(--teal-dark); transform: translateY(-1px); }
+
+    .menu-wrap { position: relative; }
+    .menu-btn {
+      padding: 10px 20px;
+      border-radius: 999px;
+      background: var(--teal);
+      color: #fff;
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 500;
+      transition: background .2s ease;
+    }
+    .menu-btn:hover { background: var(--teal-dark); }
+    .burger { width: 18px; height: 12px; display: grid; gap: 3px; }
+    .burger span { height: 2px; background: #fff; border-radius: 2px; }
+    .menu-dropdown {
+      position: absolute;
+      right: 0; top: calc(100% + 10px);
+      min-width: 200px;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+      z-index: 20;
+    }
+    .menu-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .menu-dropdown button {
+      display: block; width: 100%;
+      text-align: left;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 15px;
+    }
+    .menu-dropdown button:hover { background: #e6f1ef; }
+
+    /* ---------- HERO ---------- */
+    .hero {
+      position: relative;
+      border-radius: 28px;
+      overflow: hidden;
+      min-height: 230px;
+      background-color: #1d4a44;
+      background-image: linear-gradient(90deg, rgba(10,30,28,.85) 0%, rgba(10,30,28,.25) 60%, rgba(10,30,28,.1) 100%),
+                        var(--hero-img, url("https://placehold.co/1200x400/1f5c53/ffffff?text=Hero+Image"));
+      background-size: cover;
+      background-position: center;
+      box-shadow: var(--shadow);
+      color: #fff;
+      padding: 30px 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      max-width: 760px;
+    }
+    .hero .game-logo {
+      position: absolute; top: 14px; left: 18px;
+      font-size: 12px; font-weight: 700; letter-spacing: 1px;
+      opacity: .85;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      font-size: clamp(30px, 4vw, 46px);
+      font-weight: 600;
+      line-height: 1.1;
+    }
+    .hero p {
+      font-size: 14px;
+      line-height: 1.55;
+      max-width: 440px;
+      opacity: .92;
+    }
+
+    /* ---------- MAIN GRID ---------- */
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+    .col-left { display: grid; gap: 18px; }
+    .col-mid  { display: grid; gap: 14px; }
+    .col-right { grid-column: 3; grid-row: 1 / span 2; }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .section-title button {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+    .section-title button:hover { color: var(--teal); }
+
+    /* ---------- ARTWORKS ---------- */
+    .artworks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .art-card {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      aspect-ratio: 1 / 1.05;
+      background: #e9efed center/cover no-repeat;
+      box-shadow: var(--shadow);
+      transition: transform .3s ease, box-shadow .3s ease;
+      cursor: pointer;
+    }
+    .art-card:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 16px 36px rgba(20,50,45,.28); }
+    .art-card .credit {
+      position: absolute; left: 10px; bottom: 8px;
+      font-size: 10px;
+      color: #fff;
+      background: rgba(0,0,0,.35);
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: .5px;
+    }
+    .art-card.hidden { display: none; }
+
+    .view-more {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      background: #fff;
+      font-weight: 500;
+      box-shadow: var(--shadow);
+      transition: background .2s ease, transform .2s ease;
+    }
+    .view-more:hover { background: #f1f7f5; transform: translateY(-1px); }
+
+    /* ---------- RECENT SEARCHES ---------- */
+    .search-list { display: grid; gap: 10px; }
+    .search-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 14px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      text-align: left;
+      transition: transform .2s ease, filter .2s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,.12);
+    }
+    .search-item:hover { transform: translateX(4px); filter: brightness(1.08); }
+    .search-item svg { flex-shrink: 0; }
+    .search-item.teal { background: #1f7a6e; }
+    .search-item.brown { background: #8c5a3c; }
+    .search-item.olive { background: #8a7d4a; }
+    .search-item.grey  { background: #8a8a86; }
+    .search-item.dark  { background: #174e47; }
+
+    .search-row { display: grid; grid-template-columns: 1fr 52px; gap: 14px; align-items: center; }
+    .plus-stack { display: grid; gap: 14px; justify-items: center; }
+    .plus-btn {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: var(--shadow);
+      font-size: 26px; font-weight: 300;
+      display: grid; place-items: center;
+      transition: transform .2s ease;
+    }
+    .plus-btn:hover { transform: scale(1.1) rotate(90deg); }
+
+    .search-input-wrap {
+      display: none;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .search-input-wrap.show { display: flex; }
+    .search-input-wrap input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,.15);
+      background: #fff;
+      font: inherit; font-size: 14px;
+    }
+    .search-input-wrap button {
+      padding: 10px 16px;
+      border-radius: 10px;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 500;
+    }
+
+    /* ---------- ELEMENT / CHARACTER CARDS ---------- */
+    .info-card {
+      display: grid;
+      grid-template-columns: 62px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+      transition: transform .25s ease, box-shadow .25s ease;
+      cursor: pointer;
+    }
+    .info-card:hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(20,50,45,.25); }
+    .info-icon {
+      width: 62px; height: 62px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      background: radial-gradient(circle, #fff 0%, #dfeee9 100%);
+      font-size: 28px;
+    }
+    .info-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .info-card p { font-size: 11px; line-height: 1.45; color: var(--muted); }
+    .info-card .sprite-img {
+      width: 62px; height: 62px;
+      border-radius: 50%;
+      background: #0f4a43 center/cover no-repeat;
+    }
+    .info-card.hidden { display: none; }
+
+    .mid-stack { display: grid; gap: 16px; }
+
+    /* ---------- RIGHT PANEL ---------- */
+    .side-card {
+      border-radius: 24px;
+      overflow: hidden;
+      background: #f7faf9;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 0;
+      transition: transform .3s ease;
+    }
+    .side-card:hover { transform: translateY(-3px); }
+    .side-card .side-img {
+      height: 420px;
+      background: linear-gradient(180deg, #e9f3f0, #cfe3dd) center/cover no-repeat;
+    }
+    .side-body { padding: 16px 18px 20px; display: grid; gap: 10px; }
+    .side-body h4 { font-size: 15px; font-weight: 600; color: #6b5a2b; }
+    .stat-row {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .stat-badge {
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #e9efed;
+    }
+    .side-body .desc { font-size: 11px; line-height: 1.55; color: var(--muted); }
+    .materials { display: flex; gap: 10px; align-items: center; }
+    .materials .mat {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: #f0e7dc center/cover no-repeat;
+      transition: transform .2s ease;
+    }
+    .materials .mat:hover { transform: scale(1.1); }
+
+    /* ---------- TOAST ---------- */
+    .toast {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translate(-50%, 20px);
+      background: var(--ink);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease, transform .3s ease;
+      z-index: 50;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 1080px) {
+      .content { grid-template-columns: 1fr 1fr; }
+      .col-right { grid-column: 1 / -1; grid-row: auto; }
+      .side-card .side-img { height: 360px; }
+    }
+    @media (max-width: 760px) {
+      .app { padding: 14px 14px 28px; }
+      .header { grid-template-columns: auto 1fr auto; }
+      .nav { display: none; }
+      .header-right .user-pill { display: none; }
+      .hero { min-height: 200px; padding: 24px; }
+      .content { grid-template-columns: 1fr; }
+      .side-card .side-img { height: 320px; }
+    }
+    @media (max-width: 420px) {
+      .hero h1 { font-size: 28px; }
+      .art-card { aspect-ratio: 1 / 1.1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!--
+  ===== IMAGES =====
+  Замените ссылки ниже на свои (любой прямой URL на картинку).
+  Например: https://example.com/alhaitham.png
+-->
+<script>
+  const IMAGES = {
+    hero:     "https://placehold.co/1200x420/1f5c53/ffffff?text=Hero+Banner",
+    art1:     "https://placehold.co/400x420/2a6b60/ffffff?text=Art+1",
+    art2:     "https://placehold.co/400x420/3b7d70/ffffff?text=Art+2",
+    art3:     "https://placehold.co/400x420/4c8f80/ffffff?text=Art+3",
+    art4:     "https://placehold.co/400x420/5da192/ffffff?text=Art+4",
+    sprite1:  "https://placehold.co/124x124/0f4a43/ffffff?text=1",
+    sprite2:  "https://placehold.co/124x124/0f4a43/ffffff?text=2",
+    weapon:   "https://placehold.co/500x800/e9f3f0/1f5c53?text=Weapon",
+    mat1:     "https://placehold.co/84x84/f0e7dc/8c5a3c?text=M1",
+    mat2:     "https://placehold.co/84x84/f0e7dc/8c5a3c?text=M2"
+  };
+</script>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo" aria-label="Logo">W</div>
+      <button class="icon-btn" id="addBtn" aria-label="Добавить">+</button>
+    </div>
+
+    <nav class="nav" aria-label="Основная навигация">
+      <a href="#" data-tab="Home">Home</a>
+      <a href="#" data-tab="Search" class="active">Search</a>
+      <a href="#" data-tab="Explore">Explore</a>
+    </nav>
+
+    <div class="header-right">
+      <button class="user-pill" id="userBtn">@wxnasify</button>
+      <div class="menu-wrap">
+        <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="menuDropdown">
+          <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
+          Menu
+        </button>
+        <div class="menu-dropdown" id="menuDropdown" role="menu">
+          <button role="menuitem" data-action="profile">Профиль</button>
+          <button role="menuitem" data-action="settings">Настройки</button>
+          <button role="menuitem" data-action="theme">Сменить тему</button>
+          <button role="menuitem" data-action="about">О проекте</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <span class="game-logo">Genshin Impact</span>
+    <h1>Al-Haitham</h1>
+    <p>
+      Alhaitham is a member of the Haravatat of the Sumeru Akademiya and the
+      Akademiya's Scribe, responsible for documenting their findings and drafting ordinances.
+    </p>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+    <!-- LEFT: ARTWORKS -->
+    <section class="col-left" aria-labelledby="artTitle">
+      <div class="section-title" id="artTitle">
+        <span>ArtWorks</span>
+        <button id="artArrow" aria-label="Открыть">&gt;</button>
+      </div>
+
+      <div class="artworks" id="artworks">
+        <div class="art-card" data-art="1"><span class="credit">@GOOSEPHERE</span></div>
+        <div class="art-card" data-art="2"><span class="credit">@GOOSEPHERE</span></div>
+        <div class="art-card hidden" data-art="3"><span class="credit">@GOOSEPHERE</span></div>
+        <div class="art-card hidden" data-art="4"><span class="credit">@GOOSEPHERE</span></div>
+      </div>
+
+      <button class="view-more" id="viewMore">View More</button>
+    </section>
+
+    <!-- MIDDLE: RECENT SEARCHES + ELEMENTS -->
+    <section class="col-mid" aria-labelledby="recentTitle">
+      <div class="search-row">
+        <div>
+          <div class="section-title" id="recentTitle">Recent Searches</div>
+          <div class="search-list" id="searchList">
+            <button class="search-item teal" data-query="Al Haitham & Kaveh">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              Al Haitham &amp; Kaveh
+            </button>
+            <button class="search-item brown" data-query="Haikaveh">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              Haikaveh
+            </button>
+            <button class="search-item teal" data-query="Al Haitham build">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              Al Haitham build
+            </button>
+            <button class="search-item grey" data-query="Al Haitham abs">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              Al Haitham abs
+            </button>
+            <button class="search-item dark" data-query="Al Haitham cosplay">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              Al Haitham cosplay
+            </button>
+          </div>
+
+          <form class="search-input-wrap" id="searchForm" autocomplete="off">
+            <input type="text" id="searchInput" placeholder="Новый запрос..." maxlength="60" aria-label="Новый запрос">
+            <button type="submit">Add</button>
+          </form>
+        </div>
+
+        <div class="plus-stack">
+          <button class="plus-btn" id="plusTop" aria-label="Добавить запрос">+</button>
+          <button class="plus-btn" id="plusBottom" aria-label="Показать элементы">+</button>
+        </div>
+      </div>
+
+      <div class="mid-stack" id="elements">
+        <article class="info-card" data-element="dendro" tabindex="0">
+          <div class="info-icon" aria-hidden="true">🌿</div>
+          <div>
+            <h3>Dendro Element</h3>
+            <p>Dendro is one of the seven elements in Genshin Impact, first added in version 3.2 and linked to the Sumeru region.</p>
+          </div>
+        </article>
+
+        <article class="info-card" data-element="sumeru" tabindex="0">
+          <div class="info-icon" aria-hidden="true">🍃</div>
+          <div>
+            <h3>Sumeru</h3>
+            <p>Sumeru is one of the seven regions of Teyvat, home to the Akademiya, the Dendro Archon, and lush rainforest landscapes.</p>
+          </div>
+        </article>
+
+        <article class="info-card" data-element="haravatat" tabindex="0">
+          <div class="info-icon" aria-hidden="true">📜</div>
+          <div>
+            <h3>Haravatat</h3>
+            <p>Haravatat is one of the six Dendrons, a research body of the Akademiya focused on linguistics and ancient ruins studies.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- RIGHT: WEAPON / DETAIL CARD -->
+    <aside class="col-right">
+      <article class="side-card" id="sideCard">
+        <div class="side-img" id="weaponImg" role="img" aria-label="Оружие"></div>
+        <div class="side-body">
+          <h4>Свет лиственного разреза (Одноручное)</h4>
+          <div class="stat-row">
+            <span class="stat-badge">★★★★★</span>
+            <span class="stat-badge">Базовая атака 42</span>
+            <span class="stat-badge">Крит. урон 88.2%</span>
+            <span class="stat-badge">Энергия 542</span>
+          </div>
+          <p class="desc">
+            Остро белой луны. Оружие увеличивает показатель мастерства стихий и
+            даёт бонус к урону при срабатывании навыка.
+          </p>
+          <div class="materials" aria-label="Материалы">
+            <div class="mat" id="mat1"></div>
+            <div class="mat" id="mat2"></div>
+          </div>
+          <p class="desc">Как получить: Монетка · Материалы из подземелий</p>
+        </div>
+      </article>
+    </aside>
+
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  (function () {
+    /* ---------- Применяем картинки из IMAGES ---------- */
+    const setBg = (el, url) => { if (el && url) el.style.backgroundImage = `url("${url}")`; };
+
+    setBg(document.getElementById("hero"), IMAGES.hero);
+    document.getElementById("hero").style.setProperty("--hero-img", `url("${IMAGES.hero}")`);
+    document.querySelectorAll(".art-card").forEach((card) => {
+      const key = "art" + card.dataset.art;
+      setBg(card, IMAGES[key]);
+    });
+    document.querySelectorAll(".info-card").forEach((card, i) => {
+      const iconWrap = card.querySelector(".info-icon");
+      if (iconWrap) iconWrap.style.background = `radial-gradient(circle, #fff 0%, #dfeee9 100%)`;
+    });
+    setBg(document.getElementById("weaponImg"), IMAGES.weapon);
+    setBg(document.getElementById("mat1"), IMAGES.mat1);
+    setBg(document.getElementById("mat2"), IMAGES.mat2);
+
+    /* ---------- Toast ---------- */
+    const toast = document.getElementById("toast");
+    let toastTimer;
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2000);
+    }
+
+    /* ---------- Навигация (табы) ---------- */
+    document.querySelectorAll(".nav a").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        document.querySelectorAll(".nav a").forEach((a) => a.classList.remove("active"));
+        link.classList.add("active");
+        showToast(`Раздел: ${link.dataset.tab}`);
+      });
+    });
+
+    /* ---------- Меню ---------- */
+    const menuBtn = document.getElementById("menuBtn");
+    const dropdown = document.getElementById("menuDropdown");
+    function setMenu(open) {
+      dropdown.classList.toggle("open", open);
+      menuBtn.setAttribute("aria-expanded", String(open));
+    }
+    menuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setMenu(!dropdown.classList.contains("open"));
+    });
+    dropdown.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const actions = {
+        profile: "Профиль открыт",
+        settings: "Настройки открыты",
+        theme: "Тема изменена",
+        about: "Это демо-страница Al-Haitham"
+      };
+      showToast(actions[btn.dataset.action] || "Готово");
+      setMenu(false);
+    });
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".menu-wrap")) setMenu(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setMenu(false);
+    });
+
+    /* ---------- Кнопка профиля ---------- */
+    document.getElementById("userBtn").addEventListener("click", () => {
+      showToast("Вы вошли как @wxnasify");
+    });
+
+    /* ---------- ArtWorks: раскрыть / свернуть ---------- */
+    const artArrow = document.getElementById("artArrow");
+    const viewMore = document.getElementById("viewMore");
+    const hiddenArts = document.querySelectorAll(".art-card.hidden");
+    let artsOpen = false;
+
+    function toggleArts() {
+      artsOpen = !artsOpen;
+      hiddenArts.forEach((el) => el.classList.toggle("hidden", !artsOpen));
+      viewMore.textContent = artsOpen ? "Свернуть" : "View More";
+    }
+    viewMore.addEventListener("click", toggleArts);
+    artArrow.addEventListener("click", () => {
+      document.getElementById("artworks").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+
+    document.querySelectorAll(".art-card").forEach((card) => {
+      card.addEventListener("click", () => showToast(`Артворк #${card.dataset.art}`));
+    });
+
+    /* ---------- Recent Searches ---------- */
+    const searchList = document.getElementById("searchList");
+    const colors = ["teal", "brown", "olive", "grey", "dark"];
+    const searchIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>`;
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    function addSearch(query) {
+      const clean = query.trim();
+      if (!clean) return false;
+      const color = colors[searchList.children.length % colors.length];
+      const btn = document.createElement("button");
+      btn.className = `search-item ${color}`;
+      btn.dataset.query = clean;
+      btn.innerHTML = `${searchIcon} ${escapeHtml(clean)}`;
+      searchList.prepend(btn);
+      while (searchList.children.length > 6) searchList.lastElementChild.remove();
+      showToast(`Поиск: «${clean}»`);
+      return true;
+    }
+
+    searchList.addEventListener("click", (e) => {
+      const item = e.target.closest(".search-item");
+      if (item) showToast(`Ищем: «${item.dataset.query}»`);
+    });
+
+    /* ---------- Форма добавления запроса ---------- */
+    const searchForm = document.getElementById("searchForm");
+    const searchInput = document.getElementById("searchInput");
+    const plusTop = document.getElementById("plusTop");
+    const plusBottom = document.getElementById("plusBottom");
+
+    plusTop.addEventListener("click", () => {
+      searchForm.classList.toggle("show");
+      if (searchForm.classList.contains("show")) searchInput.focus();
+    });
+
+    searchForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (addSearch(searchInput.value)) {
+        searchInput.value = "";
+        searchForm.classList.remove("show");
+      } else {
+        showToast("Введите запрос");
+      }
+    });
+
+    /* ---------- Элементы: переключение ---------- */
+    let elementsVisible = true;
+    plusBottom.addEventListener("click", () => {
+      elementsVisible = !elementsVisible;
+      document.querySelectorAll(".info-card").forEach((c) => c.classList.toggle("hidden", !elementsVisible));
+      plusBottom.style.transform = elementsVisible ? "" : "rotate(45deg)";
+    });
+
+    document.querySelectorAll(".info-card").forEach((card) => {
+      const open = () => showToast(card.querySelector("h3").textContent);
+      card.addEventListener("click", open);
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); }
+      });
+    });
+
+    /* ---------- Кнопка "+" в шапке ---------- */
+    document.getElementById("addBtn").addEventListener("click", () => {
+      searchForm.classList.add("show");
+      searchInput.focus();
+      document.querySelector(".search-row").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  })();
+</script>
+
+</body>
+</html>
